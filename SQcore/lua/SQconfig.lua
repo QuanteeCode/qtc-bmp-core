@@ -1,7 +1,9 @@
 local CLASS = {}
 local configsPath = debug.getinfo(1).source:gsub("\\","/"):sub(2, -17) .. "configs/"
 
-local function getConfig(name)
+-- FUNCTIONS --
+
+local function get(name)
     local filePath = configsPath .. name .. ".json"
     if (FS.IsFile(filePath)) then
         return Util.JsonDecode(SQutils.readFile(filePath))
@@ -10,6 +12,8 @@ local function getConfig(name)
     end
 end
 
-CLASS.getConfig = getConfig
+-- CLASS --
+
+CLASS.get = get
 
 return CLASS

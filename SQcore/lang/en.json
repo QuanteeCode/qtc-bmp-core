@@ -1,0 +1,13 @@
+{
+    "USER_GUEST_NOT_ALLOWED": "BeamMP guest account not allowed. Click 'logout' (left bottom corner) and then register an BeamMP account",
+    "USER_NOT_FOUND": "User not found",
+    "USER_KICKED": "User kicked from the server",
+    "USER_YOU_KICKED": "You are kicked from the server",
+    "USER_BANNED": "User banned on the server",
+    "USER_YOU_BANNED": "You are banned on the server",
+    "USER_MUTED": "User muted on the server",
+    "USER_YOU_MUTED": "You are muted on the server",
+    "USER_REASON": "Reason",
+    
+    "SETTING_NOT_FOUND": "Setting not found"
+}

@@ -19,7 +19,7 @@ function SQSettings_GetSettingsList_CMD(senderId, args)
     elseif (args[1] == 'map') then
         MP.Set(MP.Settings.Map, args[2])
     else
-       print("setting not found")
+       print(SQlang.get("SETTING_NOT_FOUND"))
     end
 end
 SQcommands.register("SQSettings_GetSettingsList_CMD", "SettingsSet", "Set an setting")
