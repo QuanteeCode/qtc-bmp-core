@@ -1,16 +1,16 @@
 {
     "read": {
-        "host": "",
+        "host": "192.168.20.190",
         "port": 3306,
-        "name": "",
-        "user": "",
-        "pass": ""
+        "name": "devbeam",
+        "user": "devbeam",
+        "pass": "jzP7mcYT!go9RL!D"
     },
     "write": {
-        "host": "",
+        "host": "192.168.20.190",
         "port": 3306,
-        "name": "",
-        "user": "",
-        "pass": ""
+        "name": "devbeam",
+        "user": "devbeam",
+        "pass": "jzP7mcYT!go9RL!D"
     }
 }

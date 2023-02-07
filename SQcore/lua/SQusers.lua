@@ -3,20 +3,27 @@ local config = SQconfig.get("main")
 
 -- FUNCTIONS --
 
-local function getClientId(nick)
-    local stmt = SQdb.bind("SELECT id FROM clients WHERE nick = ?", nick)
+local function getClient(nick)
+    local stmt = SQdb.bind("SELECT * FROM clients WHERE nick = ?", nick)
     local cursor,errorString = SQdb.read():execute(stmt)
     local row = cursor:fetch ({}, "a")
     return row
 end
 
-local function getClientIdByPlayerId(playerId)
+local function getClientByPlayerId(playerId)
     local nick = MP.GetPlayerName(playerId)
     if (type(nick) == 'nil') then
         return nil
     else
-        return getClientId(nick)
+        return getClient(nick)
     end
+end
+
+local function getClientByBeamMPID(beamMPID)
+    local stmt = SQdb.bind("SELECT * FROM clients WHERE beammp_id = ?", beamMPID)
+    local cursor,errorString = SQdb.read():execute(stmt)
+    local row = cursor:fetch ({}, "a")
+    return row
 end
 
 local function getPlayerIdByName(name)
@@ -41,12 +48,12 @@ local function kick(senderId, playerId, reason)
     if (type(nick) == 'nil') then
         SQutils.responseMessage(senderId, SQlang.get("USER_NOT_FOUND") .. ": " .. nick)
     else
-        local clent = getClientId(nick)
-        if (type(clent) == nil) then
+        local client = getClient(nick)
+        if (type(client) == nil) then
             --ToDo: if player is not in db
         else
             local now = os.date("%Y-%m-%d %H:%M:%S")
-            local stmt = SQdb.bind("INSERT INTO blockings (client_id, type, reason, startedAt, endedAt) VALUES (?,?,?,?,?)", clent.id, "kick", reason, now, now)
+            local stmt = SQdb.bind("INSERT INTO blockings (client_id, type, reason, startedAt, endedAt) VALUES (?,?,?,?,?)", client.id, "kick", reason, now, now)
             local cursor,errorString = SQdb.write():execute(stmt)
         end
         SQutils.responseMessage(senderId, SQlang.get("USER_KICKED") .. ": " .. nick .. ". " .. SQlang.get("USER_REASON") .. ": " .. reason)
@@ -70,16 +77,14 @@ local function ban(senderId, playerId, reason, length)
     if (type(playerId) == 'nil') then
         SQutils.responseMessage(senderId, SQlang.get("USER_NOT_FOUND") .. ": " .. nick)
     else
-        local clent = getClientId(nick)
-        if (type(clent) == nil) then
+        local client = getClient(nick)
+        if (type(client) == nil) then
             --ToDo: if player is not in db
         else
             local t = SQutils.calcBlockingDates(length)
             local starts = os.date("%Y-%m-%d %H:%M:%S", t.startAt)
             local ends = os.date("%Y-%m-%d %H:%M:%S", t.endAt)
-            print(starts)
-            print(ends)
-            local stmt = SQdb.bind("INSERT INTO blockings (client_id, type, reason, startedAt, endedAt) VALUES (?,?,?,?,?)", clent.id, "ban", reason, starts, ends)
+            local stmt = SQdb.bind("INSERT INTO blockings (client_id, type, reason, startedAt, endedAt) VALUES (?,?,?,?,?)", client.id, "ban", reason, starts, ends)
             local cursor,errorString = SQdb.write():execute(stmt)
         end
         SQutils.responseMessage(senderId, SQlang.get("USER_BANNED") .. ": " .. nick .. ". " .. SQlang.get("USER_REASON") .. ": " .. reason)
@@ -119,17 +124,36 @@ end
 
 -- EVENTS --
 
-function SQUser_onPlayerConnecting_EH(player_id)
-    local isGuest = MP.IsPlayerGuest(player_id)
+function SQUser_onPlayerAuth_EH(player_name, player_role, is_guest)
     if (config ~= nil) then
-        if (config.guests_allowed == false and isGuest == true)  then
-            MP.DropPlayer(player_id, SQlang.get("USER_GUEST_NOT_ALLOWED"))
-            return
+        if (config.guests_allowed == false and is_guest == true)  then
+            return SQlang.get("USER_GUEST_NOT_ALLOWED")
         end
     end
+end
+MP.RegisterEvent("onPlayerAuth", "SQUser_onPlayerAuth_EH")
 
+function SQUser_onPlayerConnecting_EH(player_id)
     local nick = MP.GetPlayerName(player_id)
-    -- ToDo check ban by name
+    local playerIdentifiers = MP.GetPlayerIdentifiers(player_id)
+    local now = os.date("%Y-%m-%d %H:%M:%S")
+    local stmt, cursor, errorString, row
+
+    local client = getClientByBeamMPID(playerIdentifiers.beammp)
+    if (client == nil) then
+        stmt = SQdb.bind("INSERT INTO clients (beammp_id, nick) VALUES (?,?)", playerIdentifiers.beammp, nick)
+        cursor,errorString = SQdb.write():execute(stmt)
+        client = getClientByBeamMPID(playerIdentifiers.beammp)
+    end
+
+    if (client ~= nil) then
+        stmt = SQdb.bind("SELECT * FROM blockings WHERE client_id = ? AND endedAt > ? AND type = 'ban' AND canceled != 1", client.id, now)
+        cursor,errorString = SQdb.read():execute(stmt)
+        row = cursor:fetch ({}, "a")
+        if (row ~= nil) then
+            MP.DropPlayer(player_id, SQlang.get("USER_YOU_BANNED_UNTIL"))
+        end
+    end
 end
 MP.RegisterEvent("onPlayerConnecting", "SQUser_onPlayerConnecting_EH")
 
@@ -146,8 +170,8 @@ end
 SQcommands.register("SQusers_Ban_CMD", "ban", "Usage: /ban player_name 1 day \"reason\"")
 
 CLASS.getPlayerIdByName = getPlayerIdByName
-CLASS.getClientId = getClientId
-CLASS.getClientIdByPlayerId = getClientIdByPlayerId
+CLASS.getClient = getClient
+CLASS.getClientByPlayerId = getClientByPlayerId
 CLASS.kick = kick
 CLASS.kickByName = kickByName
 CLASS.ban = ban
