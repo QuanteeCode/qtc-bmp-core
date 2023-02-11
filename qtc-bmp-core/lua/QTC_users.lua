@@ -1,11 +1,11 @@
 local CLASS = {}
-local config = SQconfig.get("main")
+local config = QTC_config.get("main")
 
 -- FUNCTIONS --
 
 local function getClient(nick)
-    local stmt = SQdb.bind("SELECT * FROM clients WHERE nick = ?", nick)
-    local cursor,errorString = SQdb.read():execute(stmt)
+    local stmt = QTC_db.bind("SELECT * FROM clients WHERE nick = ?", nick)
+    local cursor,errorString = QTC_db.read():execute(stmt)
     local row = cursor:fetch ({}, "a")
     return row
 end
@@ -20,8 +20,8 @@ local function getClientByPlayerId(playerId)
 end
 
 local function getClientByBeamMPID(beamMPID)
-    local stmt = SQdb.bind("SELECT * FROM clients WHERE beammp_id = ?", beamMPID)
-    local cursor,errorString = SQdb.read():execute(stmt)
+    local stmt = QTC_db.bind("SELECT * FROM clients WHERE beammp_id = ?", beamMPID)
+    local cursor,errorString = QTC_db.read():execute(stmt)
     local row = cursor:fetch ({}, "a")
     return row
 end
@@ -46,17 +46,17 @@ local function kick(senderId, playerId, reason)
     end
 
     if (type(nick) == 'nil') then
-        SQutils.responseMessage(senderId, SQlang.get("USER_NOT_FOUND") .. ": " .. nick)
+        QTC_utils.responseMessage(senderId, QTC_lang.get("USER_NOT_FOUND") .. ": " .. nick)
     else
         local client = getClient(nick)
         if (type(client) == nil) then
             --ToDo: if player is not in db
         else
             local now = os.date("%Y-%m-%d %H:%M:%S")
-            local stmt = SQdb.bind("INSERT INTO blockings (client_id, type, reason, startedAt, endedAt) VALUES (?,?,?,?,?)", client.id, "kick", reason, now, now)
-            local cursor,errorString = SQdb.write():execute(stmt)
+            local stmt = QTC_db.bind("INSERT INTO blockings (client_id, type, reason, startedAt, endedAt) VALUES (?,?,?,?,?)", client.id, "kick", reason, now, now)
+            local cursor,errorString = QTC_db.write():execute(stmt)
         end
-        SQutils.responseMessage(senderId, SQlang.get("USER_KICKED") .. ": " .. nick .. ". " .. SQlang.get("USER_REASON") .. ": " .. reason)
+        QTC_utils.responseMessage(senderId, QTC_lang.get("USER_KICKED") .. ": " .. nick .. ". " .. QTC_lang.get("USER_REASON") .. ": " .. reason)
         MP.DropPlayer(playerId, reason)
     end
 end
@@ -64,7 +64,7 @@ end
 local function kickByName(senderId, nick, reason)
     local playerId = getPlayerIdByName(nick)
     if (type(playerId) == 'nil') then
-        SQutils.responseMessage(senderId, SQlang.get("USER_NOT_FOUND") .. ": " .. nick)
+        QTC_utils.responseMessage(senderId, QTC_lang.get("USER_NOT_FOUND") .. ": " .. nick)
     else
         kick(senderId, getPlayerIdByName(nick), reason)
     end
@@ -75,19 +75,19 @@ end
 local function ban(senderId, playerId, reason, length)
     local nick = MP.GetPlayerName(playerId)
     if (type(playerId) == 'nil') then
-        SQutils.responseMessage(senderId, SQlang.get("USER_NOT_FOUND") .. ": " .. nick)
+        QTC_utils.responseMessage(senderId, QTC_lang.get("USER_NOT_FOUND") .. ": " .. nick)
     else
         local client = getClient(nick)
         if (type(client) == nil) then
             --ToDo: if player is not in db
         else
-            local t = SQutils.calcBlockingDates(length)
+            local t = QTC_utils.calcBlockingDates(length)
             local starts = os.date("%Y-%m-%d %H:%M:%S", t.startAt)
             local ends = os.date("%Y-%m-%d %H:%M:%S", t.endAt)
-            local stmt = SQdb.bind("INSERT INTO blockings (client_id, type, reason, startedAt, endedAt) VALUES (?,?,?,?,?)", client.id, "ban", reason, starts, ends)
-            local cursor,errorString = SQdb.write():execute(stmt)
+            local stmt = QTC_db.bind("INSERT INTO blockings (client_id, type, reason, startedAt, endedAt) VALUES (?,?,?,?,?)", client.id, "ban", reason, starts, ends)
+            local cursor,errorString = QTC_db.write():execute(stmt)
         end
-        SQutils.responseMessage(senderId, SQlang.get("USER_BANNED") .. ": " .. nick .. ". " .. SQlang.get("USER_REASON") .. ": " .. reason)
+        QTC_utils.responseMessage(senderId, QTC_lang.get("USER_BANNED") .. ": " .. nick .. ". " .. QTC_lang.get("USER_REASON") .. ": " .. reason)
         MP.DropPlayer(playerId, reason)
     end
 end
@@ -95,7 +95,7 @@ end
 local function banByName(senderId, nick, reason, length)
     local playerId = getPlayerIdByName(nick)
     if (type(playerId) == 'nil') then
-        SQutils.responseMessage(senderId, SQlang.get("USER_NOT_FOUND") .. ": " .. nick)
+        QTC_utils.responseMessage(senderId, QTC_lang.get("USER_NOT_FOUND") .. ": " .. nick)
     else
         ban(senderId, playerId, reason, length)
     end
@@ -106,9 +106,9 @@ end
 local function mute(senderId, playerId, reason, length)
     local nick = MP.GetPlayerName(playerId)
     if (type(playerId) == 'nil') then
-        SQutils.responseMessage(senderId, SQlang.get("USER_NOT_FOUND") .. ": " .. nick)
+        QTC_utils.responseMessage(senderId, QTC_lang.get("USER_NOT_FOUND") .. ": " .. nick)
     else
-        SQutils.responseMessage(senderId, SQlang.get("USER_MUTED") .. ": " .. nick .. ". " .. SQlang.get("USER_REASON") .. ": " .. reason)
+        QTC_utils.responseMessage(senderId, QTC_lang.get("USER_MUTED") .. ": " .. nick .. ". " .. QTC_lang.get("USER_REASON") .. ": " .. reason)
         -- ToDo: mute
     end
 end
@@ -116,7 +116,7 @@ end
 local function muteByName(senderId, nick, reason, length)
     local playerId = getPlayerIdByName(nick)
     if (type(playerId) == 'nil') then
-        SQutils.responseMessage(senderId, SQlang.get("USER_NOT_FOUND") .. ": " .. nick)
+        QTC_utils.responseMessage(senderId, QTC_lang.get("USER_NOT_FOUND") .. ": " .. nick)
     else
         mute(senderId, playerId, reason, length)
     end
@@ -127,7 +127,15 @@ end
 function SQUser_onPlayerAuth_EH(player_name, player_role, is_guest)
     if (config ~= nil) then
         if (config.guests_allowed == false and is_guest == true)  then
-            return SQlang.get("USER_GUEST_NOT_ALLOWED")
+            local now = os.date("%Y-%m-%d %H:%M:%S")
+
+            stmt = QTC_db.bind("INSERT INTO connects (nick, client_id, ip) VALUES (?,?)", player_name, nil, nil)
+            cursor,errorString = QTC_db.write():execute(stmt)
+
+            print(cursor)
+            print(errorString)
+
+            return QTC_lang.get("USER_GUEST_NOT_ALLOWED")
         end
     end
 end
@@ -141,17 +149,17 @@ function SQUser_onPlayerConnecting_EH(player_id)
 
     local client = getClientByBeamMPID(playerIdentifiers.beammp)
     if (client == nil) then
-        stmt = SQdb.bind("INSERT INTO clients (beammp_id, nick) VALUES (?,?)", playerIdentifiers.beammp, nick)
-        cursor,errorString = SQdb.write():execute(stmt)
+        stmt = QTC_db.bind("INSERT INTO clients (beammp_id, nick) VALUES (?,?)", playerIdentifiers.beammp, nick)
+        cursor,errorString = QTC_db.write():execute(stmt)
         client = getClientByBeamMPID(playerIdentifiers.beammp)
     end
 
     if (client ~= nil) then
-        stmt = SQdb.bind("SELECT * FROM blockings WHERE client_id = ? AND endedAt > ? AND type = 'ban' AND canceled != 1", client.id, now)
-        cursor,errorString = SQdb.read():execute(stmt)
+        stmt = QTC_db.bind("SELECT * FROM blockings WHERE client_id = ? AND endedAt > ? AND type = 'ban' AND canceled != 1", client.id, now)
+        cursor,errorString = QTC_db.read():execute(stmt)
         row = cursor:fetch ({}, "a")
         if (row ~= nil) then
-            MP.DropPlayer(player_id, SQlang.get("USER_YOU_BANNED_UNTIL"))
+            MP.DropPlayer(player_id, QTC_lang.get("USER_YOU_BANNED_UNTIL"))
         end
     end
 end
@@ -162,12 +170,12 @@ MP.RegisterEvent("onPlayerConnecting", "SQUser_onPlayerConnecting_EH")
 function SQusers_Kick_CMD(senderId, args)
     kickByName(senderId, args[1], args[2])
 end
-SQcommands.register("SQusers_Kick_CMD", "kick", "Usage: /kick player_name \"reason\"")
+QTC_commands.register("SQusers_Kick_CMD", "kick", "Usage: /kick player_name \"reason\"")
 
 function SQusers_Ban_CMD(senderId, args)
     banByName(senderId, args[1], args[2], args[3])
 end
-SQcommands.register("SQusers_Ban_CMD", "ban", "Usage: /ban player_name 1 day \"reason\"")
+QTC_commands.register("SQusers_Ban_CMD", "ban", "Usage: /ban player_name 1 day \"reason\"")
 
 CLASS.getPlayerIdByName = getPlayerIdByName
 CLASS.getClient = getClient

@@ -63,7 +63,7 @@ local function commandsHandler(senderId, cmd)
         local cmdName = cmdParts[1]
         if (type(senderId) == 'number') then
             cmdName = string.sub(cmdName, 2)
-        end 
+        end
 
         if isRegistred(cmdName) then
             local args = {}

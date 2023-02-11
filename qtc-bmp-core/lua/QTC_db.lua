@@ -1,6 +1,6 @@
 local CLASS = {}
 local luasql = require("luasql.mysql")
-local config = SQconfig.get("db")
+local config = QTC_config.get("db")
 local env = assert(luasql.mysql())
 local db = {}
 
@@ -19,11 +19,9 @@ local function bind(sql, ... )
     sql = string.gsub(sql, "?", "%%s", 20)
 
     for i,v in ipairs(arg) do
-      --clean[i] = ngx.quote_sql_str(ngx.unescape_uri(v))
       clean[i] = "\"" .. v .. "\""
     end
 
-    --sql = db.read:escape(string.format(sql, table.unpack(clean)))
     sql = string.format(sql, table.unpack(clean))
 
     return sql
