@@ -124,24 +124,21 @@ end
 
 -- EVENTS --
 
-function SQUser_onPlayerAuth_EH(player_name, player_role, is_guest)
+function QTC_UserOnPlayerAuth_EH(player_name, player_role, is_guest)
     if (config ~= nil) then
         if (config.guests_allowed == false and is_guest == true)  then
             local now = os.date("%Y-%m-%d %H:%M:%S")
 
-            stmt = QTC_db.bind("INSERT INTO connects (nick, client_id, ip) VALUES (?,?)", player_name, nil, nil)
+            stmt = QTC_db.bind("INSERT INTO connects (nick) VALUES (?)", player_name)
             cursor,errorString = QTC_db.write():execute(stmt)
-
-            print(cursor)
-            print(errorString)
 
             return QTC_lang.get("USER_GUEST_NOT_ALLOWED")
         end
     end
 end
-MP.RegisterEvent("onPlayerAuth", "SQUser_onPlayerAuth_EH")
+MP.RegisterEvent("onPlayerAuth", "QTC_UserOnPlayerAuth_EH")
 
-function SQUser_onPlayerConnecting_EH(player_id)
+function QTC_UserOnPlayerConnecting_EH(player_id)
     local nick = MP.GetPlayerName(player_id)
     local playerIdentifiers = MP.GetPlayerIdentifiers(player_id)
     local now = os.date("%Y-%m-%d %H:%M:%S")
@@ -155,6 +152,9 @@ function SQUser_onPlayerConnecting_EH(player_id)
     end
 
     if (client ~= nil) then
+        stmt = QTC_db.bind("INSERT INTO connects (nick, client_id, ip) VALUES (?,?,?)", nick, client.id, playerIdentifiers.ip)
+        cursor,errorString = QTC_db.write():execute(stmt)
+
         stmt = QTC_db.bind("SELECT * FROM blockings WHERE client_id = ? AND endedAt > ? AND type = 'ban' AND canceled != 1", client.id, now)
         cursor,errorString = QTC_db.read():execute(stmt)
         row = cursor:fetch ({}, "a")
@@ -163,19 +163,19 @@ function SQUser_onPlayerConnecting_EH(player_id)
         end
     end
 end
-MP.RegisterEvent("onPlayerConnecting", "SQUser_onPlayerConnecting_EH")
+MP.RegisterEvent("onPlayerConnecting", "QTC_UserOnPlayerConnecting_EH")
 
 -- COMMANDS --
 
-function SQusers_Kick_CMD(senderId, args)
+function QTC_UsersKick_CMD(senderId, args)
     kickByName(senderId, args[1], args[2])
 end
-QTC_commands.register("SQusers_Kick_CMD", "kick", "Usage: /kick player_name \"reason\"")
+QTC_commands.register("QTC_UsersKick_CMD", "kick", "Usage: /kick player_name \"reason\"")
 
-function SQusers_Ban_CMD(senderId, args)
+function QTC_UsersBan_CMD(senderId, args)
     banByName(senderId, args[1], args[2], args[3])
 end
-QTC_commands.register("SQusers_Ban_CMD", "ban", "Usage: /ban player_name 1 day \"reason\"")
+QTC_commands.register("QTC_UsersBan_CMD", "ban", "Usage: /ban player_name 1 day \"reason\"")
 
 CLASS.getPlayerIdByName = getPlayerIdByName
 CLASS.getClient = getClient

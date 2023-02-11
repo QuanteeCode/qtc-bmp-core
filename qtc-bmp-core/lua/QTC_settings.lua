@@ -1,9 +1,9 @@
-function SQSettings_GetSettingsList_CMD(senderId, args)
+function QTC_SettingsGetSettingsList_CMD(senderId, args)
     print(MP.Settings)
 end
-QTC_commands.register("SQSettings_GetSettingsList_CMD", "SettingsList", "Show settings list")
+QTC_commands.register("QTC_SettingsGetSettingsList_CMD", "SettingsList", "Show settings list")
 
-function SQSettings_GetSettingsList_CMD(senderId, args)
+function QTC_SettingsGetSettingsList_CMD(senderId, args)
     if (args[1] == 'private') then
         MP.Set(MP.Settings.Private, QTC_utils(args[2]))
     elseif (args[1] == 'debug') then
@@ -22,4 +22,4 @@ function SQSettings_GetSettingsList_CMD(senderId, args)
        print(QTC_lang.get("SETTING_NOT_FOUND"))
     end
 end
-QTC_commands.register("SQSettings_GetSettingsList_CMD", "SettingsSet", "Set an setting")
+QTC_commands.register("QTC_SettingsGetSettingsList_CMD", "SettingsSet", "Set an setting")

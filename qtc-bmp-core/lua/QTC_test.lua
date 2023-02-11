@@ -1,8 +1,8 @@
 function CmdTestFn(senderId, args)
-    print("Hello from test FN")
-    print(args)
+    --print("Hello from test FN")
+    --print(args)
+    print(MP.Settings)
 end
-
 QTC_commands.register("CmdTestFn", "test", "some test cmd")
 
 -- function onPlayerJoiningEH(player_id)

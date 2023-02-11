@@ -1,5 +1,5 @@
 local CLASS = {}
-local langsPath = debug.getinfo(1).source:gsub("\\","/"):sub(2, -15) .. "lang/"
+local langsPath = debug.getinfo(1).source:gsub("\\","/"):sub(2, -18) .. "/lang/"
 
 -- FUNCTIONS -- 
 

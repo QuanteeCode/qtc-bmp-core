@@ -87,15 +87,15 @@ end
 
 -- COMMANDS --
 
-function chatCommandsHandler(senderId, senderName, cmd)
+function QTC_ChatCommandsHandler(senderId, senderName, cmd)
     return commandsHandler(senderId, cmd)
 end
-MP.RegisterEvent("onChatMessage", "chatCommandsHandler")
+MP.RegisterEvent("onChatMessage", "QTC_ChatCommandsHandler")
 
-function consoleCommandsHandler(cmd)
+function QTC_ConsoleCommandsHandler(cmd)
     return commandsHandler(nil, cmd)
 end
-MP.RegisterEvent("onConsoleInput", "consoleCommandsHandler")
+MP.RegisterEvent("onConsoleInput", "QTC_ConsoleCommandsHandler")
 
 -- CLASS --
 
