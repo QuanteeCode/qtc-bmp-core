@@ -1,4 +1,4 @@
-# SQcore plugin for BeamMP (BeamNG multiplayer)
+# QuanteeCode BeamMP core plugin
 
 ## Features
 - Chat and console command system
