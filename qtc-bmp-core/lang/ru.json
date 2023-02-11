@@ -1,0 +1,12 @@
+{
+    "USER_GUEST_NOT_ALLOWED": "Гостевой аккаунт BeamMP запрещен. Нажмите 'logout' (левый нижний угол) и потом зарегистрируйте аккаунт BeamMP",
+    "USER_KICKED": "Игрок кикнут",
+    "USER_YOU_KICKED": "Вас кикнули с сервера",
+    "USER_BANNED": "Игрок забанен",
+    "USER_YOU_BANNED": "Вас забанили на сервере",
+    "USER_YOU_BANNED_UNTIL": "Вы забанены до: ",
+    "USER_NOT_FOUND": "Пользователь не найден",
+    "USER_REASON": "Причина",
+    
+    "SETTING_NOT_FOUND": "Настройка не найдена"
+}

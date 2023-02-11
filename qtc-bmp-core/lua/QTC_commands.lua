@@ -3,13 +3,22 @@ local CMDS = {}
 local commandsPrefix = "/"
 local eventPrefix = "sqc_"
 
---
+-- FUNCTIONS -- 
 
-function getList()
+local function getList()
     return CMDS
 end
 
-function register(handler, name, description)
+local function isRegistred(name)
+    for k, v in pairs(CMDS) do
+        if (v.name == name) then
+            return k
+        end
+    end
+    return nil
+end
+
+local function register(handler, name, description)
     if (isRegistred(name) == nil) then
         local cmd = {
             name = name,
@@ -22,17 +31,6 @@ function register(handler, name, description)
     end
     MP.RegisterEvent(eventPrefix .. name, handler)
 end
-
-function isRegistred(name)
-    for k, v in pairs(CMDS) do
-        if (v.name == name) then
-            return k
-        end
-    end
-    return nil
-end
-
---
 
 local function splitCmdToArgsArray(cmd)
     local args = {}
@@ -65,7 +63,7 @@ local function commandsHandler(senderId, cmd)
         local cmdName = cmdParts[1]
         if (type(senderId) == 'number') then
             cmdName = string.sub(cmdName, 2)
-        end 
+        end
 
         if isRegistred(cmdName) then
             local args = {}
@@ -87,18 +85,19 @@ local function commandsHandler(senderId, cmd)
     end
 end
 
-function chatCommandsHandler(senderId, senderName, cmd)
+-- COMMANDS --
+
+function QTC_ChatCommandsHandler(senderId, senderName, cmd)
     return commandsHandler(senderId, cmd)
 end
+MP.RegisterEvent("onChatMessage", "QTC_ChatCommandsHandler")
 
-function consoleCommandsHandler(cmd)
+function QTC_ConsoleCommandsHandler(cmd)
     return commandsHandler(nil, cmd)
 end
+MP.RegisterEvent("onConsoleInput", "QTC_ConsoleCommandsHandler")
 
-MP.RegisterEvent("onChatMessage", "chatCommandsHandler")
-MP.RegisterEvent("onConsoleInput", "consoleCommandsHandler")
-
---
+-- CLASS --
 
 CLASS.getList = getList
 CLASS.register = register
